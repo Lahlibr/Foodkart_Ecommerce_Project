@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Foodkart.Models.DTOs.Auth
+namespace Foodkart.DTOs.Auth
 {
     public class RegistrationDto
     {

@@ -1,11 +1,11 @@
-﻿using Foodkart.Models.DTOs.Auth;
+﻿using Foodkart.DTOs.Auth;
 using Foodkart.Models.Entities;
-namespace Foodkart.Interface
+namespace Foodkart.Service.AuthService
 {
     public interface IAuthService
     {
         Task<bool> RegisterAsync(RegistrationDto regDto);
-        Task<string> LoginAsync(LoginDto logDto);
+        Task<ResultDto> LoginAsync(LoginDto logDto);
         
     }
 }

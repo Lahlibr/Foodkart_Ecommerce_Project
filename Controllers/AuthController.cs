@@ -1,10 +1,12 @@
-﻿using Foodkart.Models.DTOs.Auth;
-using Foodkart.Service;
+﻿using Foodkart.Service;
 using Foodkart.Models.Entities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
-using Foodkart.Interface;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Foodkart.DTOs.Auth;
+using Foodkart.Service.AuthService;
 
 
 namespace Foodkart.Controllers
@@ -13,28 +15,38 @@ namespace Foodkart.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authController;
+        private readonly IAuthService _authService;
         public AuthController(IAuthService authController)
         {
-            _authController = authController;
+            _authService = authController;
         }
         [HttpPost("register")]
         //"Hey, take the JSON/XML data from the HTTP request body and turn it into a C# object for me."
         public async Task<IActionResult> Register([FromBody] RegistrationDto regDto)
         {
-            var result = await _authController.RegisterAsync(regDto);
-            if (result == null)
-                return BadRequest("Registration failed. Email might already be in use.");
-            return Ok("Registration successful. Please verify your email to complete the process.");
+            var result = await _authService.RegisterAsync(regDto);
+            if (!result)
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Registration failed",
+                    errors = new { email = "Email might already be in use" }
+                });
+            return Ok(new
+            {
+                success = true,
+                message = "Registration successful. Please verify your email"
+            });
         }
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto logDto)
         {
-            var result = await _authController.LoginAsync(logDto);
+            var result = await _authService.LoginAsync(logDto);
             if (result == null)
                 return Unauthorized("Invalid email or password.");
-            return Ok(result);
+            return Ok(new {result});
         }
+        
     }
     
 }
