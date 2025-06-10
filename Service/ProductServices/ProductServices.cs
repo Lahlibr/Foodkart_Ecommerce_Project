@@ -14,13 +14,13 @@ namespace Foodkart.Service.ProductServices
         private readonly FoodkartDbContext _context;
         private readonly IMapper _mapper;
         private readonly ICloudinaryService _cloudinaryService;
-        public ProductServices(FoodkartDbContext context, IMapper mapper,ICloudinaryService cloudinaryService)
+        public ProductServices(FoodkartDbContext context, IMapper mapper, ICloudinaryService cloudinaryService)
         {
             _context = context;
             _mapper = mapper;
             _cloudinaryService = cloudinaryService;
         }
-        public async Task<List<ProductDto>> GetAllProducts(List<ProductDto> productsall)
+        public async Task<List<ProductViewDto>> GetAllProducts()
         {
             try
             {
@@ -28,28 +28,17 @@ namespace Foodkart.Service.ProductServices
                     // Eagerly loads related category data for each product. 
                     .Include(x => x.category)
                     .ToListAsync();
-                if (products.Count != 0) { 
-                    var Productsall = products.Select(x=> new ProductViewDto
-                    {
-                        Title = x.Title,
-                        Description = x.Description,
-                        Offer_Price = x.Offer_Price,
-                        Real_Price = x.Real_Price,
-                        InStock = x.InStock,
-                        Type = x.Type,
-                        ImageUrl = x.ImageUrl
-                    }).ToList();                    return productsall;
-                }
 
 
-                return _mapper.Map<List<ProductDto>>(products);
+
+                return _mapper.Map<List<ProductViewDto>>(products);
             }
             catch (Exception ex)
             {
                 throw new Exception("Error retrieving products: " + ex.Message, ex);
             }
         }
-        public async Task<ProductViewDto> GetByIdAsync(int id)
+        public async Task<ProductViewDto> GetProductsById(int id)
         {
             try
             {
@@ -64,7 +53,7 @@ namespace Foodkart.Service.ProductServices
                 throw new Exception("Error retrieving product by ID: " + ex.Message, ex);
             }
         }
-        public async Task<List<ProductViewDto>> GetByCategoryAsync(string category)
+        public async Task<List<ProductViewDto>> GetProductByCategory(string category)
         {
             try
             {
@@ -81,18 +70,21 @@ namespace Foodkart.Service.ProductServices
             }
         }
         //Creating a product 
-        public async Task<Product> CreateAsync(ProductDto pdDto,IFormFile image)
+        public async Task<Product> CreateProduct(ProductDto pdDto, IFormFile image)
         {
             try
             {
                 if (pdDto == null) throw new ArgumentNullException(nameof(pdDto), "Product data cannot be null.");
-                var category = await _context.Categories.FirstOrDefaultAsync(x=>x.CategoryId==pdDto.CategoryId);
+                var category = await _context.Categories.FirstOrDefaultAsync(x => x.CategoryId == pdDto.CategoryId);
                 if (category == null) throw new ArgumentException("Invalid category ID.", nameof(pdDto.CategoryId));
-                if (image != null)
+                if (image == null)
                 {
                     throw new ArgumentNullException(nameof(image), "Image cannot be null.");
                 }
-                _context.Products.Add(product);
+                string imageUrl = await _cloudinaryService.UploadImage(image);
+                var product = _mapper.Map<Product>(pdDto);
+                product.ImageUrl = imageUrl;
+                await _context.Products.AddAsync(product);
                 await _context.SaveChangesAsync();
                 return product;
             }
@@ -104,24 +96,77 @@ namespace Foodkart.Service.ProductServices
             {
                 throw new Exception("Error creating product: " + ex.Message, ex);
             }
+        }
         //Updating a product
-        public async Task<bool> UpdateAsync(int id, ProductDto pdDto)
+        public async Task<bool> UpdateProduct(int id, ProductDto editpdDto, IFormFile image)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) return false;
-            _mapper.Map(pdDto, product);
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-            return true;
+            //Tries to find the existing product in the database with the given ID.
+            var productex = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == id);
+            var categoryex = await _context.Categories.FirstOrDefaultAsync(x => x.CategoryId == editpdDto.CategoryId);
+            if (productex == null || categoryex == null)
+            {
+                throw new ArgumentException("Invalid product ID or category ID.");
+            }
+            try
+            {
+                // Maps the properties from the DTO to the existing product entity.
+                _mapper.Map(editpdDto, productex);
+                productex.CategoryId = editpdDto.CategoryId;
+                if (image != null && image.Length > 0)
+                {
+                    productex.ImageUrl = await _cloudinaryService.UploadImage(image);
+                }
+                // Saves the changes to the database.
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating product: " + ex.Message, ex);
+            }
         }
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteProduct(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) return false;
-            await _context.SaveChangesAsync();
-            return true;
+            var product = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == id);
+            try
+            {
+                if (product == null) throw new ArgumentException("Invalid product ID.", nameof(id));
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (ArgumentException ex) // Catch specific ArgumentException if you want to differentiate
+            {
+                throw new Exception($"Validation error: {ex.Message}", ex); // Re-throw with more context
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting product: " + ex.Message, ex);
+            }
         }
+        public async Task<List<ProductViewDto>> SearchProduct(string searchTerm)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    return new List<ProductViewDto>();
+                }
+                var lowerSearchTerm = searchTerm.Trim().ToLower();
+                var products = await _context.Products
+                    .Include(x => x.category)
+                    .Where(x => x.Title.ToLower().Contains(lowerSearchTerm) ||
+                                x.Description.ToLower().Contains(lowerSearchTerm))
+                    .ToListAsync();
+                return _mapper.Map<List<ProductViewDto>>(products);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error searching products: " + ex.Message, ex);
+            }
 
 
+        }
     }
 }
+
