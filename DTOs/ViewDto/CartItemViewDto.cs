@@ -8,6 +8,6 @@
         public decimal? RealPrice { get; set; }
         public decimal OfferPrice { get; set; }
         public int Quantity { get; set; }
-        public decimal TotalPrice { get; set; }
+        public decimal TotalPrice => OfferPrice * Quantity;
     }
 }

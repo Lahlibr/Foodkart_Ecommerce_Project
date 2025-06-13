@@ -46,13 +46,13 @@ namespace Foodkart.Models.Entities.Main
         
         
         public virtual ICollection<Address> Addresses { get; set; } = new HashSet<Address>();
-        
+        public virtual ICollection<Order> Orders { get; set; } = new HashSet<Order>();
 
 
         //virtual Enables lazy loading in EF Core(if enabled)
         //ICollection	Represents a collection for one-to-many relationships
 
 
-    
+
     }
 }

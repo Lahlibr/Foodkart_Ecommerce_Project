@@ -12,7 +12,8 @@ namespace Foodkart.Models.Entities.Orders
         public decimal? TotalPrice { get; set; }
         public int Quantity { get; set; }
         public virtual Product? Product { get; set; }
+        public virtual Order RelatedOrder { get; set; }
 
-       
+
     }
 }

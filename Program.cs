@@ -10,6 +10,7 @@ using Foodkart.Service.CloudinaryService;
 using Foodkart.Services.CloudinarySevice;
 using Foodkart.Service.CategoriesServices;
 using Foodkart.Service.CartService;
+using Foodkart.Service.OrderServices;
 
 namespace Foodkart
 {
@@ -123,7 +124,7 @@ namespace Foodkart
             builder.Services.AddScoped<IProductService, ProductServices>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICartService, CartService>();
-            builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
+            builder.Services.AddScoped<IOrderService, OrderService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
