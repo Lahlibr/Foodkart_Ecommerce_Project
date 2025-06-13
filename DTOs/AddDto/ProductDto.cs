@@ -5,11 +5,12 @@ namespace Foodkart.DTOs.AddDto
     public class ProductDto
     {
         [Required]
-        public string? Title { get; set; }
+        public string? ProductName { get; set; }
         [Required]
         public string? Description { get; set; }
         [Required]
-        public decimal? Price { get; set; }
+        public decimal? RealPrice { get; set; }
+        public decimal? OfferPrice { get; set; }
 
         [Required]
         public int InStock { get; set; }

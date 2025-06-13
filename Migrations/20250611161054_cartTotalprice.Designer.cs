@@ -4,6 +4,7 @@ using Foodkart.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Foodkart.Migrations
 {
     [DbContext(typeof(FoodkartDbContext))]
-    partial class FoodkartDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250611161054_cartTotalprice")]
+    partial class cartTotalprice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +62,6 @@ namespace Foodkart.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -104,8 +106,8 @@ namespace Foodkart.Migrations
 
                     b.Property<string>("Place")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PostOffice")
                         .IsRequired()
@@ -119,7 +121,7 @@ namespace Foodkart.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("Foodkart.Models.Entities.Main.Category", b =>
@@ -214,7 +216,7 @@ namespace Foodkart.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Foodkart.Models.Entities.Main.Wishlist", b =>
@@ -294,17 +296,17 @@ namespace Foodkart.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("OfferPrice")
+                    b.Property<decimal>("Offer_Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ProductName")
+                    b.Property<decimal>("Real_Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("RealPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -321,7 +323,7 @@ namespace Foodkart.Migrations
                     b.HasOne("Foodkart.Models.Entities.Main.User", "User")
                         .WithOne("Carts")
                         .HasForeignKey("Foodkart.Models.Entities.Carts.Cart", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -351,7 +353,7 @@ namespace Foodkart.Migrations
                     b.HasOne("Foodkart.Models.Entities.Main.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -368,7 +370,7 @@ namespace Foodkart.Migrations
                     b.HasOne("Foodkart.Models.Entities.Main.User", "users")
                         .WithMany("Wishlists")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("products");

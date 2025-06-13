@@ -4,6 +4,7 @@ using Foodkart.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Foodkart.Migrations
 {
     [DbContext(typeof(FoodkartDbContext))]
-    partial class FoodkartDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250612111358_makechangesinprice")]
+    partial class makechangesinprice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,17 +297,17 @@ namespace Foodkart.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("OfferPrice")
+                    b.Property<decimal>("Offer_Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ProductName")
+                    b.Property<decimal>("Real_Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("RealPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");

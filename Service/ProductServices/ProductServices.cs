@@ -155,7 +155,7 @@ namespace Foodkart.Service.ProductServices
                 var lowerSearchTerm = searchTerm.Trim().ToLower();
                 var products = await _context.Products
                     .Include(x => x.category)
-                    .Where(x => x.Title.ToLower().Contains(lowerSearchTerm) ||
+                    .Where(x => x.ProductName.ToLower().Contains(lowerSearchTerm) ||
                                 x.Description.ToLower().Contains(lowerSearchTerm))
                     .ToListAsync();
                 return _mapper.Map<List<ProductViewDto>>(products);

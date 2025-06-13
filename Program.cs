@@ -8,6 +8,8 @@ using Foodkart.Service.AuthService;
 using Foodkart.Service.ProductServices;
 using Foodkart.Service.CloudinaryService;
 using Foodkart.Services.CloudinarySevice;
+using Foodkart.Service.CategoriesServices;
+using Foodkart.Service.CartService;
 
 namespace Foodkart
 {
@@ -99,6 +101,12 @@ namespace Foodkart
                     { securityScheme, Array.Empty<string>() }
                 });
             });
+            builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
             // CORS Configuration
             builder.Services.AddCors(options =>
@@ -113,6 +121,9 @@ namespace Foodkart
             });
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             builder.Services.AddScoped<IProductService, ProductServices>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
