@@ -24,7 +24,7 @@ namespace Foodkart.Models.Entities.Orders
 
         public virtual User? User { get; set; }
         public virtual Address? Address { get; set; }
-        public virtual List<OrderItem>? OrderItems { get; set; }
+        public ICollection<OrderItem> OrderItems { get; set; }
         public string Status { get; set; }
     }
 }

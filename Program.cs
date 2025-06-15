@@ -11,6 +11,7 @@ using Foodkart.Services.CloudinarySevice;
 using Foodkart.Service.CategoriesServices;
 using Foodkart.Service.CartService;
 using Foodkart.Service.OrderServices;
+using Foodkart.Service.UserService;
 
 namespace Foodkart
 {
@@ -120,6 +121,8 @@ namespace Foodkart
                           .AllowCredentials();
                 });
             });
+            builder.Services.AddScoped<IUserService, UserService>();
+
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
             builder.Services.AddScoped<IProductService, ProductServices>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();

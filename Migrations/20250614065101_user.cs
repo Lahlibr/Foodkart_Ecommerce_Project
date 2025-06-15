@@ -5,7 +5,7 @@
 namespace Foodkart.Migrations
 {
     /// <inheritdoc />
-    public partial class AddOrder : Migration
+    public partial class user : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

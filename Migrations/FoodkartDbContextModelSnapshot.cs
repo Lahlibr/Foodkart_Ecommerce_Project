@@ -390,7 +390,7 @@ namespace Foodkart.Migrations
                     b.HasOne("Foodkart.Models.Entities.Main.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -418,15 +418,15 @@ namespace Foodkart.Migrations
             modelBuilder.Entity("Foodkart.Models.Entities.Orders.Order", b =>
                 {
                     b.HasOne("Foodkart.Models.Entities.Main.Address", "Address")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Foodkart.Models.Entities.Main.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Address");
@@ -467,6 +467,11 @@ namespace Foodkart.Migrations
             modelBuilder.Entity("Foodkart.Models.Entities.Carts.Cart", b =>
                 {
                     b.Navigation("CartItems");
+                });
+
+            modelBuilder.Entity("Foodkart.Models.Entities.Main.Address", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("Foodkart.Models.Entities.Main.Category", b =>

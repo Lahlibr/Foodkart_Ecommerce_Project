@@ -5,7 +5,7 @@
 namespace Foodkart.Migrations
 {
     /// <inheritdoc />
-    public partial class Firstas : Migration
+    public partial class role : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

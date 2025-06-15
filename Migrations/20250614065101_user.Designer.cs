@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Foodkart.Migrations
 {
     [DbContext(typeof(FoodkartDbContext))]
-    [Migration("20250606081816_Emailverifications")]
-    partial class Emailverifications
+    [Migration("20250614065101_user")]
+    partial class user
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,6 +61,10 @@ namespace Foodkart.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("TotalPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CartId");
@@ -103,8 +107,8 @@ namespace Foodkart.Migrations
 
                     b.Property<string>("Place")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("PostOffice")
                         .IsRequired()
@@ -118,7 +122,7 @@ namespace Foodkart.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Addresses", (string)null);
+                    b.ToTable("Addresses");
                 });
 
             modelBuilder.Entity("Foodkart.Models.Entities.Main.Category", b =>
@@ -128,6 +132,13 @@ namespace Foodkart.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -206,7 +217,7 @@ namespace Foodkart.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Foodkart.Models.Entities.Main.Wishlist", b =>
@@ -232,6 +243,43 @@ namespace Foodkart.Migrations
                     b.ToTable("Wishlists");
                 });
 
+            modelBuilder.Entity("Foodkart.Models.Entities.Orders.Order", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<int>("AddressId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("AddressId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
             modelBuilder.Entity("Foodkart.Models.Entities.Orders.OrderItem", b =>
                 {
                     b.Property<int>("OrderItemId")
@@ -253,6 +301,8 @@ namespace Foodkart.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("OrderItemId");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("productId");
 
@@ -286,17 +336,17 @@ namespace Foodkart.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Offer_Price")
+                    b.Property<decimal>("OfferPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Real_Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("ProductName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("RealPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -313,7 +363,7 @@ namespace Foodkart.Migrations
                     b.HasOne("Foodkart.Models.Entities.Main.User", "User")
                         .WithOne("Carts")
                         .HasForeignKey("Foodkart.Models.Entities.Carts.Cart", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -360,7 +410,7 @@ namespace Foodkart.Migrations
                     b.HasOne("Foodkart.Models.Entities.Main.User", "users")
                         .WithMany("Wishlists")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("products");
@@ -368,8 +418,33 @@ namespace Foodkart.Migrations
                     b.Navigation("users");
                 });
 
+            modelBuilder.Entity("Foodkart.Models.Entities.Orders.Order", b =>
+                {
+                    b.HasOne("Foodkart.Models.Entities.Main.Address", "Address")
+                        .WithMany("Orders")
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Foodkart.Models.Entities.Main.User", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Address");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Foodkart.Models.Entities.Orders.OrderItem", b =>
                 {
+                    b.HasOne("Foodkart.Models.Entities.Orders.Order", "RelatedOrder")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Foodkart.Models.Entities.Products.Product", "Product")
                         .WithMany()
                         .HasForeignKey("productId")
@@ -377,6 +452,8 @@ namespace Foodkart.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("RelatedOrder");
                 });
 
             modelBuilder.Entity("Foodkart.Models.Entities.Products.Product", b =>
@@ -395,6 +472,11 @@ namespace Foodkart.Migrations
                     b.Navigation("CartItems");
                 });
 
+            modelBuilder.Entity("Foodkart.Models.Entities.Main.Address", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("Foodkart.Models.Entities.Main.Category", b =>
                 {
                     b.Navigation("Products");
@@ -406,7 +488,14 @@ namespace Foodkart.Migrations
 
                     b.Navigation("Carts");
 
+                    b.Navigation("Orders");
+
                     b.Navigation("Wishlists");
+                });
+
+            modelBuilder.Entity("Foodkart.Models.Entities.Orders.Order", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Foodkart.Models.Entities.Products.Product", b =>

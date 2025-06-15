@@ -40,6 +40,6 @@ namespace Foodkart.Models.Entities.Main
 
         public virtual User? User { get; set; }
 
-       
+        public ICollection<Order> Orders { get; set; }
     }
 }

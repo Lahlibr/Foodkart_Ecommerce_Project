@@ -11,7 +11,7 @@ namespace Foodkart.Service.CartService
         Task<ApiResponse<CartViewDto>> AddQuantity(int userId, int productId, int quantity);
         Task<ApiResponse<CartViewDto>> ReduceQuantity(int userId, int productId, int quantity);
         Task<ApiResponse<CartViewDto>> ClearCart(int userId);
-        Task<ApiResponse<CartViewDto>> AllUsersCart(int userId,int productId,int quantity);
+        Task<ApiResponse<List<CartViewDto>>> AllUsersCart(int productId);
 
     }
 }

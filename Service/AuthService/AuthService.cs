@@ -77,7 +77,7 @@ namespace Foodkart.Service.AuthService
                 if(usr == null)
                 {
                     _logger.LogWarning($"Login failed: User with email {logDto.Email} not found.");
-                    return new ResultDto { Error = "user is Not found" };
+                    return new ResultDto { Error = $"{logDto.Email} is not found" };
                 }
                 if(usr.Blocked == true)
                 {

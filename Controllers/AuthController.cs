@@ -42,8 +42,13 @@ namespace Foodkart.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto logDto)
         {
             var result = await _authService.LoginAsync(logDto);
-            if (result == null)
-                return Unauthorized("Invalid email or password.");
+            if (!string.IsNullOrEmpty(result.Error))
+            {
+                if (result.Error.Contains("blocked"))
+                    return StatusCode(403, new { message = result.Error });
+
+                return Unauthorized(new { message = result.Error });
+            }
             return Ok(new {result});
         }
         

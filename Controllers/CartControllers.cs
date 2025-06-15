@@ -23,12 +23,14 @@ namespace Foodkart.Controllers
         private readonly ICartService _cartService;
         private readonly FoodkartDbContext _context;
         private readonly IMapper _mapper;
+        
 
         public CartControllers(ICartService cartService, FoodkartDbContext context,IMapper mapper)
         {
             _cartService = cartService;
             _context = context;
             _mapper = mapper;
+            
         }
         [HttpPost("AddToCart")]
         [Authorize(Roles = "User")]
@@ -155,18 +157,49 @@ namespace Foodkart.Controllers
                 _ => BadRequest(new ApiResponse<string>(400, "Bad request"))
             };
         }
-        [HttpGet("admin/all-users")]
+        [HttpGet("admin/all-users-carts")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<ActionResult<ApiResponse<List<CartItemViewDto>>>> GetAllUsersCarts()
         {
-            var users = await _context.Users.ToListAsync();
+            try
+            {
+                var carts = await _context.Carts
+                    .Include(c => c.User)
+                    .Include(c => c.CartItems)
+                        .ThenInclude(ci => ci.Product)
+                    .ToListAsync();
 
-            if (!users.Any())
-                return NotFound(new ApiResponse<string>(404, "No users found"));
+                if (carts == null || !carts.Any())
+                    return NotFound(new ApiResponse<string>(404, "No carts found"));
 
-            var userDtos = _mapper.Map<List<UserDto>>(users);
-            return Ok(new ApiResponse<List<UserDto>>(200, "Users retrieved successfully", userDtos));
+                var userCartsDto = carts.Select(c => new UserDto
+                {
+                    Id = c.UserId,
+                    Username = c.User?.Username,
+                    Email = c.User?.Email,
+                    Carts = new CartViewDto
+                    {
+                        Items = c.CartItems.Select(ci => new CartItemViewDto
+                        {
+                            ProductId = ci.ProductId,
+                            ProductName = ci.Product?.ProductName,
+                            Image = ci.Product?.ImageUrl,
+                            RealPrice = ci.Product?.RealPrice,
+                            OfferPrice = ci.Product?.OfferPrice ?? 0,
+                            Quantity = ci.Quantity
+                        }).ToList()
+                    }
+                }).ToList();
+
+                return Ok(new ApiResponse<List<UserDto>>(200, "All users' carts retrieved successfully", userCartsDto));
+            }
+            catch (Exception ex)
+            {
+               
+                return StatusCode(500, new ApiResponse<string>(500, "Internal server error"));
+            }
         }
+
 
 
     }

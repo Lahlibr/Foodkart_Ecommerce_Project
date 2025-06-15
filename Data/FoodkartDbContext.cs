@@ -37,6 +37,11 @@ namespace Foodkart.Data
             modelBuilder.Entity<User>()
                 .Property(u => u.Deleted)
                 .HasDefaultValue(false);
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Orders)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.Products)
                 .WithOne(p => p.category)
@@ -55,16 +60,23 @@ namespace Foodkart.Data
                 .HasOne(ci => ci.Product)
                 .WithMany(p => p.CartItems)
                 .HasForeignKey(ci => ci.ProductId);
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.Orders)
-                .WithOne(o => o.User)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+           
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.RelatedOrder)
                 .WithMany(o => o.OrderItems)
                 .HasForeignKey(oi => oi.OrderId);
-
+            modelBuilder.Entity<Address>()
+                .HasKey(a => a.AddressId);
+            modelBuilder.Entity<Address>()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Addresses)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Address)
+                .WithMany(a => a.Orders)
+                .HasForeignKey(o => o.AddressId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

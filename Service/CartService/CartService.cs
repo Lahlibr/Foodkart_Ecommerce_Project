@@ -220,31 +220,33 @@ namespace Foodkart.Service.CartService
                 return new ApiResponse<CartViewDto>(500, "Internal server error", null);
             }
         }
-        public async Task<ApiResponse<CartViewDto>> AllUsersCart(int userId, int productId, int quantity)
+        public async Task<ApiResponse<List<CartViewDto>>> AllUsersCart(int productId)
         {
             try
             {
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems.Where(ci => ci.ProductId == productId))
-                        .ThenInclude(ci => ci.Product)
+                var carts = await _context.Carts
                     .Include(c => c.User)
+                    .Include(c => c.CartItems)
+                        .ThenInclude(ci => ci.Product)
                     .Where(c => c.CartItems.Any(ci => ci.ProductId == productId))
-                    
                     .ToListAsync();
-                    
-                if (cart == null || cart.Count == 0)
+
+                if (carts == null || carts.Count == 0)
                 {
-                    return new ApiResponse<CartViewDto>(404, "Cart is empty or not found", null);
+                    return new ApiResponse<List<CartViewDto>>(404, "No carts found for this product", null);
                 }
-                var AllusersCart = _mapper.Map<CartViewDto>(cart);
-                return new ApiResponse<CartViewDto>(200, "All users cart retrieved successfully", AllusersCart);
+
+                // Map to list of CartViewDto
+                var allUsersCarts = _mapper.Map<List<CartViewDto>>(carts);
+
+                return new ApiResponse<List<CartViewDto>>(200, "All users cart retrieved successfully", allUsersCarts);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving all users cart");
-                return new ApiResponse<CartViewDto>(500, "Internal server error", null);
+                _logger.LogError(ex, "Error retrieving all users' carts");
+                return new ApiResponse<List<CartViewDto>>(500, "Internal server error", null);
             }
-
         }
+
     }
 }
