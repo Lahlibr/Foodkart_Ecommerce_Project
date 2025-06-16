@@ -21,7 +21,7 @@ namespace Foodkart.Service.OrderServices
             _logger = logger;
             _mapper = mapper;
         }
-        public async Task<ApiResponse<CartSummaryDto>> CreateOrderAsync(int userId)
+        public async Task<ApiResponse<CartViewDto>> CreateOrderAsync(int userId)
         {
             var cart = await _context.Carts
                 .Include(c => c.CartItems)
@@ -30,7 +30,7 @@ namespace Foodkart.Service.OrderServices
 
             if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
             {
-                return new ApiResponse<CartSummaryDto>(404, "Cart is empty.");
+                return new ApiResponse<CartViewDto>(404, "Cart is empty.");
             }
 
             var items = cart.CartItems.Select(ci => new CartItemViewDto
@@ -40,12 +40,12 @@ namespace Foodkart.Service.OrderServices
                 Quantity = ci.Quantity
             }).ToList();
 
-            var summary = new CartSummaryDto
+            var summary = new CartViewDto
             {
                 Items = items
             };
 
-            return new ApiResponse<CartSummaryDto>(200, "Cart summary fetched successfully", summary);
+            return new ApiResponse<CartViewDto>(200, "Cart summary fetched successfully", summary);
 
         }
 

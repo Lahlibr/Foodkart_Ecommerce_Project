@@ -29,7 +29,7 @@ namespace Foodkart.Controllers
             }
         }
         [HttpGet("All")]
-        [Authorize]
+        
         public async Task<IActionResult> GetAllCategories()
         {
             try

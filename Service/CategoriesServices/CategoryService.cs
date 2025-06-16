@@ -66,7 +66,9 @@ namespace Foodkart.Service.CategoriesServices
 
         public async Task<List<CategoryViewDto>> GetAllCategories()
         {
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _context.Categories
+                .Include(c=>c.Products)
+                .ToListAsync();
             if (categories == null || categories.Count == 0)
             {
                 throw new Exception("No categories found.");

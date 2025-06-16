@@ -9,6 +9,8 @@ using Foodkart.DTOs.Auth;
 using Foodkart.DTOs.Products;
 using Foodkart.Models.Entities.Main;
 using AutoMapper;
+using Foodkart.DTOs.ViewDto;
+using Foodkart.Models.Entities.Carts;
 
 
 namespace Foodkart.Service.AuthService
@@ -71,46 +73,63 @@ namespace Foodkart.Service.AuthService
         {
             try
             {
-                _logger.LogInformation("Logging into the user");
+                _logger.LogInformation("Attempting to log in user with email: {Email}", logDto.Email);
+
                 var usr = await _context.Users
-                    .SingleOrDefaultAsync(u => u.Email == logDto.Email );
-                if(usr == null)
+                    .Include(u => u.Carts)
+                        .ThenInclude(c => c.CartItems)
+                            .ThenInclude(ci => ci.Product)
+                    .SingleOrDefaultAsync(u => u.Email == logDto.Email);
+
+                if (usr == null)
                 {
-                    _logger.LogWarning($"Login failed: User with email {logDto.Email} not found.");
+                    _logger.LogWarning("Login failed: User with email {Email} not found.", logDto.Email);
                     return new ResultDto { Error = $"{logDto.Email} is not found" };
                 }
-                if(usr.Blocked == true)
+
+                if (usr.Blocked)
                 {
-                    _logger.LogWarning($"Login failed: User with email {logDto.Email} is blocked.");
-                    return new ResultDto { Error = "user is blocked" };
+                    _logger.LogWarning("Login failed: User with email {Email} is blocked.", logDto.Email);
+                    return new ResultDto { Error = "User is blocked" };
                 }
-                _logger.LogInformation("Validating email...");
-                var pass = ValidatePassword(logDto.Password, usr.PasswordHash);
-                if(!pass)
+
+                _logger.LogInformation("Validating password for user {Email}", logDto.Email);
+                bool isPasswordValid = ValidatePassword(logDto.Password, usr.PasswordHash);
+
+                if (!isPasswordValid)
                 {
-                    _logger.LogWarning($"Login failed: Invalid password for user with email {logDto.Email}.");
+                    _logger.LogWarning("Login failed: Invalid password for user {Email}.", logDto.Email);
                     return new ResultDto { Error = "Invalid Password" };
                 }
-                _logger.LogInformation("Password validated successfully generating token");
+
+                _logger.LogInformation("Password validated. Generating JWT token for user {Email}", logDto.Email);
                 var token = GenerateJwtToken(usr);
+
+                // Use null-safe navigation and mapping
+                var cartItemDtos = usr.Carts?.CartItems != null
+                    ? _mapper.Map<List<CartItemViewDto>>(usr.Carts.CartItems)
+                    : new List<CartItemViewDto>();
+
                 return new ResultDto
                 {
                     Token = token,
                     Role = usr.Role,
                     Email = usr.Email,
                     Id = usr.Id,
-                    Name = usr.Username
+                    Name = usr.Username,
+                    Carts = cartItemDtos,
+                    Wishlists = "" // Fill later if needed
                 };
-
             }
-            catch (Exception ex) {
-                {
-                    _logger.LogError($"An error occurred during login: {ex.Message}");
-                    throw new Exception("An error occurred during login. Please try again later.", ex);
-                }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during login for user {Email}", logDto.Email);
+                throw new Exception("An error occurred during login. Please try again later.", ex);
             }
         }
-        
+
+
+
         private string GenerateJwtToken(User user)
         {
             var claims = new[]

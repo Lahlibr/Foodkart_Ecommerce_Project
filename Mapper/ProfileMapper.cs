@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Foodkart.DTOs.AddDto;
 using Foodkart.DTOs.Auth;
-using Foodkart.DTOs.Main;
 using Foodkart.DTOs.Products;
 using Foodkart.DTOs.ViewDto;
 using Foodkart.Models.Entities.Carts;
@@ -28,8 +27,9 @@ namespace Foodkart.Mapper
             CreateMap<Product, ProductViewDto>().ReverseMap();
             CreateMap<ProductDto, Product>().ReverseMap();
             CreateMap<Address, AddressDto>().ReverseMap();
-           
-            CreateMap<Wishlist, WishlistDto>().ReverseMap();
+
+            CreateMap<Wishlist, WishlistViewDto>().ReverseMap();
+                
             CreateMap<CartItems, CartItemViewDto>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
                 .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
@@ -44,5 +44,5 @@ namespace Foodkart.Mapper
         }
     }
 
-    
+   
 }

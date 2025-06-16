@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Foodkart.DTOs.Products;
 using Microsoft.AspNetCore.Http;
 
 namespace Foodkart.DTOs.ViewDto
@@ -16,5 +17,6 @@ namespace Foodkart.DTOs.ViewDto
         // If you're uploading the image
         [Required(ErrorMessage = "Image is required.")]
         public IFormFile? Image { get; set; }
+        public List<ProductViewDto> Products { get; set; }
     }
 }

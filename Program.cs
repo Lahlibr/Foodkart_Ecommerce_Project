@@ -12,6 +12,8 @@ using Foodkart.Service.CategoriesServices;
 using Foodkart.Service.CartService;
 using Foodkart.Service.OrderServices;
 using Foodkart.Service.UserService;
+using System.Text.Json.Serialization;
+using Foodkart.Service.WishlistService;
 
 namespace Foodkart
 {
@@ -21,16 +23,30 @@ namespace Foodkart
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add services
             builder.Services.AddLogging();
-            builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
             builder.Services.AddDbContext<FoodkartDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddScoped<IProductService, ProductServices>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IWishlist, WishlistService>();
+
+            builder.Services.AddControllers()
+                .AddJsonOptions(opt =>
+                {
+                    opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                });
+
+            builder.Services.AddEndpointsApiExplorer();
 
             // JWT Authentication
             builder.Services.AddAuthentication(options =>
@@ -103,14 +119,8 @@ namespace Foodkart
                     { securityScheme, Array.Empty<string>() }
                 });
             });
-            builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.WriteIndented = true;
-    });
 
-            // CORS Configuration
+            // CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("ReactPolicy", policy =>
@@ -121,16 +131,10 @@ namespace Foodkart
                           .AllowCredentials();
                 });
             });
-            builder.Services.AddScoped<IUserService, UserService>();
 
-            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-            builder.Services.AddScoped<IProductService, ProductServices>();
-            builder.Services.AddScoped<ICategoryService, CategoryService>();
-            builder.Services.AddScoped<ICartService, CartService>();
-            builder.Services.AddScoped<IOrderService, OrderService>();
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Middleware pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -138,7 +142,9 @@ namespace Foodkart
             }
 
             app.UseHttpsRedirection();
+
             app.UseCors("ReactPolicy");
+
             app.UseAuthentication();
             app.UseAuthorization();
 

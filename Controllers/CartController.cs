@@ -18,14 +18,14 @@ namespace Foodkart.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CartControllers:ControllerBase
+    public class CartController:ControllerBase
     {
         private readonly ICartService _cartService;
         private readonly FoodkartDbContext _context;
         private readonly IMapper _mapper;
         
 
-        public CartControllers(ICartService cartService, FoodkartDbContext context,IMapper mapper)
+        public CartController(ICartService cartService, FoodkartDbContext context,IMapper mapper)
         {
             _cartService = cartService;
             _context = context;
