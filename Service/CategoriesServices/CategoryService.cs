@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Foodkart.Data;
+using Foodkart.DTOs.AddDto;
 using Foodkart.DTOs.ViewDto;
 using Foodkart.Models.Entities.Main;
 using Foodkart.Service.CloudinaryService;
@@ -23,7 +24,7 @@ namespace Foodkart.Service.CategoriesServices
 
         }
 
-        public async Task<bool> AddCategory(CategoryViewDto ctDto, IFormFile image)
+        public async Task<bool> AddCategory(CreateCategoryDto ctDto, IFormFile image)
         {
             try
             {
@@ -102,7 +103,7 @@ namespace Foodkart.Service.CategoriesServices
             _mapper.Map(categoryDto, category);
 
             // If new image is provided, update it
-            if (categoryDto.Image != null && categoryDto.Image.Length > 0)
+            if (categoryDto.ImageUrl != null && categoryDto.ImageUrl.Length > 0)
             {
                 string imagePath = await _cloudinaryService.UploadImage(image);
                 category.ImageUrl = imagePath;

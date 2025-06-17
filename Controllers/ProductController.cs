@@ -19,8 +19,8 @@ namespace Foodkart.Controllers
         {
             _productService = productService;
         }
-        [HttpGet]
-        [Authorize]
+        [HttpGet("All")]
+        
         public async Task<IActionResult> GetAllProducts()
         {
             var products = await _productService.GetAllProducts();
@@ -30,8 +30,8 @@ namespace Foodkart.Controllers
             }
             return Ok(products);
         }
-        [HttpGet("PdbyId/{id}")]
-        [Authorize]
+        [HttpGet("{id}")]
+       
         public async Task<IActionResult> GetProductById(int id)
         {
             var product = await _productService.GetProductsById(id);

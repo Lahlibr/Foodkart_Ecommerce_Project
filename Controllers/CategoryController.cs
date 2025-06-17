@@ -1,4 +1,5 @@
-﻿using Foodkart.DTOs.ViewDto;
+﻿using Foodkart.DTOs.AddDto;
+using Foodkart.DTOs.ViewDto;
 using Foodkart.Service.CategoriesServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,7 @@ namespace Foodkart.Controllers
         
         [HttpPost("Add")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddCategory([FromForm] CategoryViewDto categoryDto)
+        public async Task<IActionResult> AddCategory([FromForm] CreateCategoryDto categoryDto)
         {
             if (categoryDto == null)
                 return BadRequest("Category data is missing.");

@@ -24,6 +24,7 @@ namespace Foodkart.Mapper
                            opt => opt.MapFrom(src => src.Wishlists));
 
             CreateMap<Category, CategoryViewDto>().ReverseMap();
+            CreateMap<Category, CreateCategoryDto>().ReverseMap();
             CreateMap<Product, ProductViewDto>().ReverseMap();
             CreateMap<ProductDto, Product>().ReverseMap();
             CreateMap<Address, AddressDto>().ReverseMap();

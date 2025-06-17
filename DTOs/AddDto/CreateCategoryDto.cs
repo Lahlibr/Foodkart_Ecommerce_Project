@@ -1,12 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Foodkart.DTOs.Products;
-using Microsoft.AspNetCore.Http;
+﻿using Foodkart.DTOs.Products;
+using System.ComponentModel.DataAnnotations;
 
-namespace Foodkart.DTOs.ViewDto
+namespace Foodkart.DTOs.AddDto
 {
-    public class CategoryViewDto
+    public class CreateCategoryDto
     {
-        public int CategoryId {  get; set; }
+        public int CategoryId { get; set; }
         [Required(ErrorMessage = "Category name is required.")]
         [StringLength(100, ErrorMessage = "Category name must be under 100 characters.")]
         public string Name { get; set; }
@@ -16,7 +15,7 @@ namespace Foodkart.DTOs.ViewDto
 
         // If you're uploading the image
         [Required(ErrorMessage = "Image is required.")]
-        public string ImageUrl { get; set; }
-        public List<ProductViewDto> Products { get; set; }
+        public IFormFile Image { get; set; }
+       
     }
 }
