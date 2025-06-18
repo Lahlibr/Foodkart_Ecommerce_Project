@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Foodkart.Service.WishlistService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Foodkart.Controllers
@@ -19,6 +20,7 @@ namespace Foodkart.Controllers
             _mapper = mapper;
         }
         [HttpPost("AddToWishlist/{userId}/{productId}")]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> AddToWishlist(int userId, int productId)
         {
             try
@@ -37,6 +39,7 @@ namespace Foodkart.Controllers
             }
         }
         [HttpGet("GetWishlist/{userId}")]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> GetWishlist(int userId)
         {
             try

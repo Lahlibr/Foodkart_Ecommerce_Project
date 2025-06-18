@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Amazon.IdentityManagement.Model;
 using AutoMapper;
 using Foodkart.Data;
+using Foodkart.DTOs.AddDto;
 using Foodkart.DTOs.ViewDto;
 using Foodkart.Models.Entities.Main;
 using Foodkart.Service.CartService;
@@ -34,35 +35,25 @@ namespace Foodkart.Controllers
         }
         [HttpPost("AddToCart")]
         [Authorize(Roles = "User")]
-        public async Task<IActionResult> AddToCart(int productid ,int quantity)
+        public async Task<IActionResult> AddToCart([FromBody] AddToCart request)
         {
-            //UserClaimsPrincipal object available in any ASP.NET Core controller (inherited from ControllerBase).It represents the currently authenticated user and holds their identity and all claims issued by the authentication system (like a JWT token).
-            //FindFirst(...) searches for a specific claim in the user's token.
-
-             //ClaimTypes.NameIdentifier is a standardized claim type that usually holds the unique identifier of the user(i.e., user ID).
-
-             //In JWT tokens, this maps to the sub(subject) claim, or sometimes a custom claim depending on configuration.
-
-             //If you issued your JWT token with a claim like "sub": "10" or "nameid": "10", this is how you access it.
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userid))
             {
                 return Unauthorized(new { message = "User not authenticated" });
             }
 
-            var result = await _cartService.AddToCart(userid, productid, quantity);
+            var result = await _cartService.AddToCart(userid, request.ProductId, request.Quantity);
 
             return result.StatusCode switch
             {
                 200 => Ok(result),
                 404 => NotFound(new ApiResponse<string>(404, result.Message)),
                 409 => Conflict(new ApiResponse<string>(409, result.Message)),
-                _ => BadRequest(new ApiResponse<string>(400, "Bad request"))
+                _ => BadRequest(new ApiResponse<string>(400, result.Message))
             };
-
-
         }
+
         [HttpGet("GetCartItems")]
         [Authorize(Roles = "User")]
         public async Task<IActionResult> GetCartItems()

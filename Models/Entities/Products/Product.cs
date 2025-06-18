@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Foodkart.Models.Entities.Carts;
 using Foodkart.Models.Entities.Main;
+using Foodkart.Models.Enum;
 using Microsoft.EntityFrameworkCore;
 using static Foodkart.Models.Entities.Base.TimeStamp;
 
@@ -23,8 +24,7 @@ namespace Foodkart.Models.Entities.Products
         public decimal RealPrice { get; set; }
         public string? ImageUrl { get; set; } = null;
         public int InStock { get; set; } 
-        public enum FoodType {
-        Veg,NonVeg}
+        
         [Required]
         public FoodType Type { get; set; } = FoodType.Veg;
         [Required]

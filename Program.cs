@@ -14,6 +14,7 @@ using Foodkart.Service.OrderServices;
 using Foodkart.Service.UserService;
 using System.Text.Json.Serialization;
 using Foodkart.Service.WishlistService;
+using Microsoft.Extensions.Options;
 
 namespace Foodkart
 {
@@ -44,6 +45,7 @@ namespace Foodkart
                 .AddJsonOptions(opt =>
                 {
                     opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                    opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -97,6 +99,7 @@ namespace Foodkart
                         Email = "support@foodkart.com"
                     }
                 });
+                c.UseInlineDefinitionsForEnums();
 
                 var securityScheme = new OpenApiSecurityScheme
                 {

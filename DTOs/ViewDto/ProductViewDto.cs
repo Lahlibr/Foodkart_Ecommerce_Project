@@ -1,4 +1,5 @@
-﻿using static Foodkart.Models.Entities.Products.Product;
+﻿using Foodkart.Models.Enum;
+using static Foodkart.Models.Entities.Products.Product;
 
 namespace Foodkart.DTOs.Products
 {

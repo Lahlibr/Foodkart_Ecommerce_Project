@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Foodkart.Models.Enum;
 
 namespace Foodkart.DTOs.AddDto
 {
@@ -16,5 +17,8 @@ namespace Foodkart.DTOs.AddDto
         public int InStock { get; set; }
         [Required]
         public int CategoryId { get; set; }
+        [Required]
+        public FoodType Type { get; set; } 
+        
     }
 }

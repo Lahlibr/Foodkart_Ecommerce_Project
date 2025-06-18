@@ -42,7 +42,7 @@ namespace Foodkart.Controllers
             return Ok(product);
         }
         [HttpGet("pdbyct/{category}")]
-        [Authorize]
+        
         public async Task<IActionResult> GetProductByCategory(string category)
         {
             var products = await _productService.GetProductByCategory(category);
