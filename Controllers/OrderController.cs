@@ -3,6 +3,7 @@ using Amazon.IdentityManagement.Model;
 using AutoMapper;
 using Foodkart.Data;
 using Foodkart.DTOs.AddDto;
+using Foodkart.DTOs.ViewDto;
 using Foodkart.Service.OrderServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,9 @@ namespace Foodkart.Controllers
             _mapper = mapper;
             _context = context;
         }
-        [HttpPost("place")]
+        [HttpPost("Place")]
         [Authorize]
-        public async Task<IActionResult> PlaceOrder()
+        public async Task<IActionResult> PlaceOrder([FromBody]CreateOrderRequestDto orderDto)
         {
             try
             {
@@ -37,7 +38,7 @@ namespace Foodkart.Controllers
                     return Unauthorized("Invalid or missing user ID in token.");
                 }
 
-                var response = await _orderService.CreateOrderAsync(userId);
+                var response = await _orderService.CreateOrderAsync(orderDto.UserId, orderDto.AddressId);
 
                 return StatusCode(response.StatusCode, response);
             }
@@ -48,8 +49,8 @@ namespace Foodkart.Controllers
             }
         }
 
-        [HttpGet("{userid}")]
-        [Authorize(Roles = "Admin")]
+        [HttpGet("UserOrderDetails/{userid}")]
+        [Authorize]
         public async Task<IActionResult> GetOrderDetails(int userid)
         {
             try
@@ -57,8 +58,9 @@ namespace Foodkart.Controllers
                 var orders = await _orderService.GetOrdersforAdmin(userid);
                 if (orders == null || orders.Count == 0)
                 {
-                    return Ok("there is no order for this user");
+                    return Ok(new List<OrderViewDto>()); // Or whatever DTO you use
                 }
+
                 return Ok(orders);
             }
             catch (Exception ex)
@@ -66,6 +68,7 @@ namespace Foodkart.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetOrders()

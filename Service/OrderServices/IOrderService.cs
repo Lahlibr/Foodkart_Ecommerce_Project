@@ -6,7 +6,7 @@ namespace Foodkart.Service.OrderServices
 {
     public interface IOrderService
     {
-        Task<ApiResponse<CartViewDto>> CreateOrderAsync(int userId);
+        Task<ApiResponse<string>> CreateOrderAsync(int userId,int addressId);
         Task<ApiResponse<List<OrderViewDto>>> GetOrders(int userId);
         Task<List<AdminViewOrderDto>> GetOrdersforAdmin(int userId);
         Task<int> TotalProductSold();

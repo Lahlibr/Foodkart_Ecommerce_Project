@@ -15,6 +15,7 @@ using Foodkart.Service.UserService;
 using System.Text.Json.Serialization;
 using Foodkart.Service.WishlistService;
 using Microsoft.Extensions.Options;
+using Foodkart.Service.AddressService;
 
 namespace Foodkart
 {
@@ -40,6 +41,7 @@ namespace Foodkart
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IWishlist, WishlistService>();
+            builder.Services.AddScoped<IAddressService, AddressService>();
 
             builder.Services.AddControllers()
                 .AddJsonOptions(opt =>

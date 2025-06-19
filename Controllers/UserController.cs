@@ -17,7 +17,7 @@ namespace Foodkart.Controllers
         }
 
         // GET: api/users
-        [HttpGet]
+        [HttpGet("Admin")]
         [Authorize(Roles = "Admin")] 
         public async Task<ActionResult<List<UserDto>>> GetAllUsers()
         {

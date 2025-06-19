@@ -27,7 +27,7 @@ namespace Foodkart.Mapper
             CreateMap<Category, CreateCategoryDto>().ReverseMap();
             CreateMap<Product, ProductViewDto>().ReverseMap();
             CreateMap<ProductDto, Product>().ReverseMap();
-            CreateMap<Address, AddressDto>().ReverseMap();
+            CreateMap<Address, AddresViewDto>().ReverseMap();
 
             CreateMap<Wishlist, WishlistViewDto>().ReverseMap();
                 

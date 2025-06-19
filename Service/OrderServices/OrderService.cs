@@ -21,33 +21,63 @@ namespace Foodkart.Service.OrderServices
             _logger = logger;
             _mapper = mapper;
         }
-        public async Task<ApiResponse<CartViewDto>> CreateOrderAsync(int userId)
+        public async Task<ApiResponse<string>> CreateOrderAsync(int userId, int addressId)
         {
-            var cart = await _context.Carts
-                .Include(c => c.CartItems)
-                    .ThenInclude(ci => ci.Product)
-                .FirstOrDefaultAsync(c => c.UserId == userId);
-
-            if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
+            try
             {
-                return new ApiResponse<CartViewDto>(404, "Cart is empty.");
+                // Verify the address exists and belongs to the user
+                var addressExists = await _context.Addresses
+                    .AnyAsync(a => a.AddressId == addressId && a.UserId == userId);
+
+                if (!addressExists)
+                {
+                    return new ApiResponse<string>(400, "Invalid address ID or address doesn't belong to user");
+                }
+
+                var cart = await _context.Carts
+                    .Include(c => c.CartItems)
+                        .ThenInclude(ci => ci.Product)
+                    .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                if (cart == null || cart.CartItems == null || !cart.CartItems.Any())
+                {
+                    return new ApiResponse<string>(404, "Cart is empty.");
+                }
+
+                string transactionId = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 12).ToUpper();
+                decimal totalAmount = cart.CartItems.Sum(ci => ci.Product.OfferPrice * ci.Quantity);
+
+                var newOrder = new Order
+                {
+                    UserId = userId,
+                    AddressId = addressId, // Add this line
+                    TransactionId = transactionId,
+                    OrderDate = DateTime.UtcNow,
+                    TotalAmount = totalAmount,
+                    Status = "Pending",
+                    OrderItems = cart.CartItems.Select(ci => new OrderItem
+                    {
+                        productId = ci.ProductId,
+                        Quantity = ci.Quantity,
+                        TotalPrice = ci.Product.OfferPrice * ci.Quantity
+                    }).ToList()
+                };
+
+                await _context.Orders.AddAsync(newOrder);
+                _context.CartItems.RemoveRange(cart.CartItems);
+
+                await _context.SaveChangesAsync();
+
+                return new ApiResponse<string>(200, "Order placed successfully", transactionId);
             }
-
-            var items = cart.CartItems.Select(ci => new CartItemViewDto
+            catch (Exception ex)
             {
-                ProductName = ci.Product.ProductName,
-                OfferPrice = ci.Product.OfferPrice,
-                Quantity = ci.Quantity
-            }).ToList();
-
-            var summary = new CartViewDto
-            {
-                Items = items
-            };
-
-            return new ApiResponse<CartViewDto>(200, "Cart summary fetched successfully", summary);
-
+                _logger.LogError(ex, "An error occurred while placing the order");
+                return new ApiResponse<string>(500, $"Error: {ex.InnerException?.Message ?? ex.Message}");
+            }
         }
+
+
 
         public async Task<ApiResponse<List<OrderViewDto>>> GetOrders(int userid)
         {
