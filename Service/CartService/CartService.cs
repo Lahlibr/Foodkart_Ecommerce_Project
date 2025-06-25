@@ -23,26 +23,39 @@ namespace Foodkart.Service.CartService
         {
             try
             {
-                //This loads the user by userId from the database.
-                //.Include(u => u.Cart).ThenInclude(c => c.cartitems) ensures:
-                //The user's cart and the cart items are loaded too (eager loading).
                 var user = await _context.Users
                     .Include(u => u.Carts)
                     .ThenInclude(c => c.CartItems)
                         .ThenInclude(ci => ci.Product)
                     .FirstOrDefaultAsync(u => u.Id == userId);
+
                 if (user == null)
                     return new ApiResponse<CartViewDto>(404, "User not found", null);
+
                 var product = await _context.Products
                     .FirstOrDefaultAsync(p => p.ProductId == productId);
+
                 if (product == null)
                     return new ApiResponse<CartViewDto>(404, "Product not found", null);
-                if (product.InStock < quantity)
-                    return new ApiResponse<CartViewDto>(400, "Insufficient stock", null);
-                //f the user doesn’t already have a cart, it creates one using the helper method.
+
+                // Check available stock
+                var currentCartQuantity = user.Carts?.CartItems
+                    .Where(ci => ci.ProductId == productId)
+                    .Sum(ci => ci.Quantity) ?? 0;
+
+                var requestedTotal = currentCartQuantity + quantity;
+
+                if (product.InStock < requestedTotal)
+                {
+                    return new ApiResponse<CartViewDto>(400,
+                        $"Only {product.InStock - currentCartQuantity} items available in stock",
+                        null);
+                }
+
+                // Rest of your existing code...
                 var cart = user.Carts ?? await CreateCartForUserAsync(user);
-                //It checks if the product is already in the cart.
                 var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+
                 if (existingItem != null)
                 {
                     existingItem.Quantity += quantity;
@@ -50,7 +63,6 @@ namespace Foodkart.Service.CartService
                 }
                 else
                 {
-
                     var cartItem = new CartItems
                     {
                         ProductId = productId,
@@ -59,6 +71,7 @@ namespace Foodkart.Service.CartService
                     };
                     cart.CartItems.Add(cartItem);
                 }
+
                 await _context.SaveChangesAsync();
                 return new ApiResponse<CartViewDto>(200, "Product added to cart successfully", _mapper.Map<CartViewDto>(cart));
             }
@@ -149,8 +162,17 @@ namespace Foodkart.Service.CartService
                     return new ApiResponse<CartViewDto>(404, "Item not found in cart", null);
                 }
 
-                itemToUpdate.Quantity += quantity;
-                itemToUpdate.TotalPrice += itemToUpdate.Product.OfferPrice * quantity;
+                // Check stock before adding quantity
+                var newTotalQuantity = itemToUpdate.Quantity + quantity;
+                if (itemToUpdate.Product.InStock < newTotalQuantity)
+                {
+                    return new ApiResponse<CartViewDto>(400,
+                        $"Only {itemToUpdate.Product.InStock} items available in stock",
+                        null);
+                }
+
+                itemToUpdate.Quantity = newTotalQuantity;
+                itemToUpdate.TotalPrice = itemToUpdate.Product.OfferPrice * newTotalQuantity;
 
                 await _context.SaveChangesAsync();
 

@@ -17,6 +17,7 @@ namespace Foodkart.DTOs.AddDto
         public int InStock { get; set; }
         [Required]
         public int CategoryId { get; set; }
+        public string? CategoryName { get; set; }
         [Required]
         public FoodType Type { get; set; } 
         

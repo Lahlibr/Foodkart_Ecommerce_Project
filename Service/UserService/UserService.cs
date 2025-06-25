@@ -20,7 +20,8 @@ namespace Foodkart.Service.UserService
         public async Task<List<UserDto>> AllUser()
         {
             try
-            {
+            {   
+                
                 var users = await _context.Users
                     .Include(u => u.Carts)
                         .ThenInclude(c => c.CartItems)

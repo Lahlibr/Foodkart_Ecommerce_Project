@@ -69,7 +69,7 @@ namespace Foodkart.Controllers
        
         [HttpPut("Update/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromForm] CategoryViewDto categoryDto)
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryViewDto categoryDto)
         {
             if (categoryDto == null)
                 return BadRequest("Category data is missing.");

@@ -72,6 +72,7 @@ namespace Foodkart.Service.ProductServices
         //Creating a product 
         public async Task<Product> CreateProduct(ProductDto pdDto, IFormFile image)
         {
+            Console.WriteLine("Creating a new product...",pdDto);
             try
             {
                 if (pdDto == null) throw new ArgumentNullException(nameof(pdDto), "Product data cannot be null.");

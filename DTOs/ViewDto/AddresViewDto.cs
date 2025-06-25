@@ -31,6 +31,6 @@ namespace Foodkart.DTOs.ViewDto
 
         [Required(ErrorMessage = "Land mark is required")]
         [StringLength(200, ErrorMessage = "Landmark must not exceed 200 characters")]
-        public string landmark { get; set; }
+        public string Landmark { get; set; }
     }
 }

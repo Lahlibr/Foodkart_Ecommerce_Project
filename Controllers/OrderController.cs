@@ -7,6 +7,7 @@ using Foodkart.DTOs.ViewDto;
 using Foodkart.Service.OrderServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Foodkart.Controllers
 {
@@ -69,21 +70,33 @@ namespace Foodkart.Controllers
             }
         }
 
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetOrders()
+        [HttpGet("Admin/Orders")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllOrders()
         {
-            try
-            {
-                var userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-                var result = await _orderService.GetOrders(userId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            var orders = await _context.Orders
+    .Include(o => o.User)
+    .Include(o => o.OrderItems)
+        .ThenInclude(oi => oi.Product)
+    .Select(o => new
+    {
+        o.OrderId,
+        Username = o.User.Username,
+        Email = o.User.Email,
+        Products = o.OrderItems.Select(oi => new {
+            Name = oi.Product.ProductName,
+            Quantity = oi.Quantity,
+            Price = oi.Product.OfferPrice // or RealPrice
+        }),
+        TotalPrice = o.TotalAmount,
+        CreatedAt = o.OrderDate
+    })
+    .ToListAsync();
+
+
+            return Ok(orders);
         }
+
         [HttpGet("sales")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> TotalSale()

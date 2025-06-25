@@ -16,21 +16,27 @@ namespace Foodkart.Service.AddressService
             _context = context;
             _mapper = mapper;
         }
-        public async Task<ApiResponse<string>> AddAddressAsync(int userId, AddresViewDto addressDto)
+        public async Task<ApiResponse<AddresViewDto>> AddAddressAsync(int userId, AddresViewDto addressDto)
         {
             try
             {
                 var address = _mapper.Map<Address>(addressDto);
                 address.UserId = userId;
+
                 _context.Addresses.Add(address);
                 await _context.SaveChangesAsync();
-                return new ApiResponse<string>(200, "Address added successfully.");
+
+                // Optionally re-map the saved entity to a view DTO with ID
+                var addedAddressDto = _mapper.Map<AddresViewDto>(address);
+
+                return new ApiResponse<AddresViewDto>(200, "Address added successfully.", addedAddressDto);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<string>(500, $"An error occurred while adding the address: {ex.Message}");
+                return new ApiResponse<AddresViewDto>(500, $"An error occurred while adding the address: {ex.Message}");
             }
         }
+
 
         public async Task<ApiResponse<List<AddresViewDto>>> GetAllAddressesAsync(int userId)
         {

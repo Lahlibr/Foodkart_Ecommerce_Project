@@ -54,7 +54,7 @@ namespace Foodkart.Controllers
         }
         [HttpPost("Create")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateProduct([FromForm] ProductDto productDto, IFormFile image)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductDto productDto, IFormFile image)
         {
             if (productDto == null || image == null)
             {

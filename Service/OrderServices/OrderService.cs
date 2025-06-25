@@ -25,7 +25,7 @@ namespace Foodkart.Service.OrderServices
         {
             try
             {
-                // Verify the address exists and belongs to the user
+                // Verify address exists
                 var addressExists = await _context.Addresses
                     .AnyAsync(a => a.AddressId == addressId && a.UserId == userId);
 
@@ -34,6 +34,7 @@ namespace Foodkart.Service.OrderServices
                     return new ApiResponse<string>(400, "Invalid address ID or address doesn't belong to user");
                 }
 
+                // Get cart with items
                 var cart = await _context.Carts
                     .Include(c => c.CartItems)
                         .ThenInclude(ci => ci.Product)
@@ -44,13 +45,24 @@ namespace Foodkart.Service.OrderServices
                     return new ApiResponse<string>(404, "Cart is empty.");
                 }
 
+                // Verify stock before creating order
+                foreach (var cartItem in cart.CartItems)
+                {
+                    if (cartItem.Product.InStock < cartItem.Quantity)
+                    {
+                        return new ApiResponse<string>(400,
+                            $"Not enough stock for {cartItem.Product.ProductName}. Only {cartItem.Product.InStock} available.");
+                    }
+                }
+
+                // Create order
                 string transactionId = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 12).ToUpper();
                 decimal totalAmount = cart.CartItems.Sum(ci => ci.Product.OfferPrice * ci.Quantity);
 
                 var newOrder = new Order
                 {
                     UserId = userId,
-                    AddressId = addressId, // Add this line
+                    AddressId = addressId,
                     TransactionId = transactionId,
                     OrderDate = DateTime.UtcNow,
                     TotalAmount = totalAmount,
@@ -63,9 +75,16 @@ namespace Foodkart.Service.OrderServices
                     }).ToList()
                 };
 
+                // Update product stock quantities
+                foreach (var cartItem in cart.CartItems)
+                {
+                    cartItem.Product.InStock -= cartItem.Quantity;
+                    _context.Products.Update(cartItem.Product);
+                }
+
+                // Save changes
                 await _context.Orders.AddAsync(newOrder);
                 _context.CartItems.RemoveRange(cart.CartItems);
-
                 await _context.SaveChangesAsync();
 
                 return new ApiResponse<string>(200, "Order placed successfully", transactionId);
