@@ -2,6 +2,7 @@
 using Foodkart.Service.WishlistService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Foodkart.Controllers
 {
@@ -19,17 +20,26 @@ namespace Foodkart.Controllers
             _logger = logger;
             _mapper = mapper;
         }
-        [HttpPost("AddToWishlist/{userId}/{productId}")]
+        [HttpPost("AddToWishlist/{productId}")]
         [Authorize(Roles = "User")]
-        public async Task<IActionResult> AddToWishlist(int userId, int productId)
+        public async Task<IActionResult> AddToWishlist(int productId)
         {
             try
             {
+                var userIdClaim = User.FindFirst("id") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return Unauthorized("User ID not found in token.");
+                }
+
+                int userId = int.Parse(userIdClaim.Value);
+
                 var response = await _wishlistService.AddToWishlist(userId, productId);
                 if (response.StatusCode == 404)
                 {
                     return NotFound(response.Message);
                 }
+
                 return Ok(response);
             }
             catch (Exception ex)
@@ -38,6 +48,7 @@ namespace Foodkart.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
         [HttpGet("GetWishlist/{userId}")]
         [Authorize(Roles = "User")]
         public async Task<IActionResult> GetWishlist(int userId)
